@@ -4,7 +4,6 @@ ex.py
 utils.py
 bot.py
 *.log
-*.jpg
 *.sql
 *.ogg
 .vscode/

@@ -121,6 +121,7 @@ def get_audio_messages(message):
         os.remove(fname+'.wav')
         os.remove(fname+'.oga')
 
+
 def audio_to_text(dest_name: str):
     # Функция для перевода аудио, в формате ".vaw" в текст
     rating = 0
@@ -137,6 +138,7 @@ def audio_to_text(dest_name: str):
         return f"Вы произнесли '{result}' все верно\nВаш рейтинг {rating}"
     elif result.strip() != twister_lib[twister].strip():
         return f"Вы произнесли '{result}' не верно, а должно быть'{twister_lib[twister]}'"
+
 
 bot.polling(none_stop=True, interval=0)
 # повторяем обращение к telegram
