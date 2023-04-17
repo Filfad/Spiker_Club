@@ -1,0 +1,14 @@
+settings.py
+monday.py
+ex.py
+utils.py
+bot.py
+*.log
+*.jpg
+*.sql
+*.ogg
+.vscode/
+.idea/
+env/
+.DS_Store
+__pycache__/
