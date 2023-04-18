@@ -18,12 +18,12 @@ logfile = str(datetime.date.today()) + '.log'
 bot = telebot.TeleBot(settings.TOKEN_TELEGRAM_BOT)
 twister = random_twister()
 twister_lib = {
-    "twister1": "на окошке крошку мошку ловко ловит лапой кошка",
-    "twister2": "хорош у ежа пирожок внутри пирожка творожок",
-    "twister3": "дельфин учил дельфинёнка свистеть тонко претонко",
-    "twister4": "у ежа и ёлки иголки колки у ежа ежата у ужа ужата",
-    "twister5": "пыхтит как пышка пухлый мишка",
-    "twister6": "шесть шустрых мышат в камышах шуршат"
+    "twister1": "привет",
+    "twister2": "пока",
+    "twister3": "друг",
+    "twister4": "стол",
+    "twister5": "сту",
+    "twister6": "рука"
     }
 
 
@@ -122,6 +122,9 @@ def get_audio_messages(message):
         os.remove(fname+'.oga')
 
 
+
+
+
 def audio_to_text(dest_name: str):
     # Функция для перевода аудио, в формате ".vaw" в текст
     rating = 0
@@ -131,13 +134,33 @@ def audio_to_text(dest_name: str):
     with message as source:
         audio = r.record(source)
     result = r.recognize_google(audio, language="ru_RU").lower()
+    return difference_three(result.strip(), twister_lib[twister].strip())
+
     # используя возможности библиотеки распознаем текст,
     # можно изменять язык распознавания
-    if result.strip() == twister_lib[twister].strip():
-        rating = + 1
+    #if result.strip() == twister_lib[twister].strip():
+        #rating = + 1
+        
+    
+"""
         return f"Вы произнесли '{result}' все верно\nВаш рейтинг {rating}"
     elif result.strip() != twister_lib[twister].strip():
         return f"Вы произнесли '{result}' не верно, а должно быть'{twister_lib[twister]}'"
+"""
+
+
+def difference_three(txt1, txt2):
+ # разрешает сделать 2 ошибки
+ # сравнивает посимвольно строку и если
+    count = 0
+    if len(txt1) == len(txt2):
+        for i in range(0, len(txt1)):
+            if txt1[i] == txt2[i]:
+                count = count + 1
+    if count+2 >= len(txt1):
+        return "все верно\nВаш рейтинг"
+    else:
+        return "Не верно! Вы произнесли"
 
 
 bot.polling(none_stop=True, interval=0)
