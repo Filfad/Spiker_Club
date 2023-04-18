@@ -28,47 +28,47 @@ twister_lib = {
 
 
 def random_twister():
-
     twister = random.choice(list(twister_lib))
     return twister
 
 
+def photo(message):
+    file = open("images/" + twister + ".jpg", "rb")
+    # обращаемся к текущей папке к файлу 1.jpg, rb - открываем для чтения
+    bot.send_photo(message.from_user.id, file)
+    return message
+
+
+def main_keyboard(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    button_1 = types.KeyboardButton("Новая скороговорка")
+    markup.row(button_1)
+    button_2 = types.KeyboardButton("Рейтинг")
+    button_3 = types.KeyboardButton("Написать тренеру")
+    markup.row(button_2, button_3)
+    msg = bot.send_message(message.from_user.id, 'Давайте заниматься',
+                           reply_markup=markup)
+    """Хочу убрать текст Давайте заниматься """
+    bot.register_next_step_handler(msg, on_click)
+
+
+def on_click(message):
+    if message.text == "Новая скороговорка":
+        photo(message)
+    if message.text == "Рейтинг":
+        rating_list()
+
+
+def rating_list():
+    pass
+
+
 @bot.message_handler(commands=["start"])  # декоратор обрабатывает старт
 def greeting_user(message):
-    markup = types.InlineKeyboardMarkup()  # создаем тип -  кнопка
-    button_1 = types.InlineKeyboardButton(
-        "Новая скороговорка", callback_data="new"
-        )
-    # добавляем кнопку c названием
-    markup.row(button_1)  # порядок кнопок 1 ряд
-    button_2 = types.InlineKeyboardButton(
-        "Рейтинг", callback_data="rating"
-        )
-    # добавляем кнопку c названием
-    markup.row(button_2)  # порядок кнопок 2 ряд
-    button_3 = types.InlineKeyboardButton(
-        "Написать тренеру", url="https://t.me/natalia_latfullina"
-        )
-    markup.row(button_3)
     bot.send_message(message.from_user.id, "Привет я бот <b>SpikerClub</b>\n"
                      "помогаю тренировать речь с помощью скороговорок,\n"
-                     "что бы начать нажмите <b>Новая скороговорка</b>",
-                     parse_mode="html",
-                     reply_markup=markup)
-# форматирование текста в формате html parse_mode = "html"
-
-
-@bot.callback_query_handler(func=lambda callback: True)
-# анонимная лямда функция, если будет пустойто возвращаем True
-def send_twister(callback):
-    if callback.data == "new":
-        file = open("images/" + twister + ".jpg", "rb")
-        # обращаемся к текущей папке к файлу 1.jpg, rb - открываем для чтения
-        bot.send_photo(callback.message.chat.id, file)
-
-
-# def rating():
-#   pass
+                     "что бы начать нажмите\n <b>Новая скороговорка</b>",
+                     parse_mode="html", reply_markup=main_keyboard(message))
 
 
 @bot.message_handler(content_types=['voice'])
@@ -80,7 +80,8 @@ def get_audio_messages(message):
         path = file_info.file_path  # путь до файла
         fname = os.path.basename(path)  # Преобразуем путь в имя файла
         doc = requests.get(
-            'https://api.telegram.org/file/bot{0}/{1}'.format(settings.TOKEN_TELEGRAM_BOT, file_info.file_path))
+            'https://api.telegram.org/file/bot{0}/{1}'
+            .format(settings.TOKEN_TELEGRAM_BOT, file_info.file_path))
         # Получаем аудиосообщение
         with open(fname+'.oga', 'wb') as f:
             f.write(doc.content)
@@ -91,7 +92,10 @@ def get_audio_messages(message):
         # Вызов функции для перевода аудио в текст
         bot.send_message(
             message.from_user.id,
-            f"{difference_three(result.strip(),twister_lib[twister].strip())} произнес:\n '{result}'\n должно быть:\n '{twister_lib[twister]}'")
+            f"{difference_three(result.strip(),twister_lib[twister].strip())}"
+            f"Вы произнесли:\n<b>{result.capitalize()}</b>\nДолжно быть:\n"
+            f"<b>{twister_lib[twister].capitalize()}</b>",
+            parse_mode="html", reply_markup=main_keyboard(message))
         # Отправляем пользователю, сравнениее аудио и скороговорки
     except sr.UnknownValueError as e:
         # Ошибка возникает, если сообщение не удалось разобрать.
@@ -126,7 +130,6 @@ def get_audio_messages(message):
 
 def audio_to_text(dest_name: str):
     # Функция для перевода аудио, в формате ".vaw" в текст
-    rating = 0
     r = sr.Recognizer()
     # читаем наш .vaw файл
     message = sr.AudioFile(dest_name)
@@ -134,29 +137,19 @@ def audio_to_text(dest_name: str):
         audio = r.record(source)
     result = r.recognize_google(audio, language="ru_RU").lower()
     return result
-
     # используя возможности библиотеки распознаем текст,
     # можно изменять язык распознавания
-
-
-"""if result.strip() == twister_lib[twister].strip():
-        rating = + 1
-        return f"Вы произнесли '{result}' все верно\nВаш рейтинг {rating}"
-    elif result.strip() != twister_lib[twister].strip():
-        return f"Вы произнесли '{result}'
-        не верно, а должно быть'{twister_lib[twister]}'"
-"""
 
 
 def difference_three(txt1, txt2):
     # разрешает сделать 2 ошибки
     # сравнивает посимвольно строку и если
     count = 0
-    if len(txt1)+2 >= len(txt2):
+    if len(txt1)+3 >= len(txt2):
         for i in range(0, len(txt1)):
             if txt1[i] == txt2[i]:
                 count = count + 1
-    if count+2 >= len(txt1):
+    if count+3 >= len(txt1):
         return "все верно!\n"
     else:
         return "Не верно, попробуйте еще раз\n"
