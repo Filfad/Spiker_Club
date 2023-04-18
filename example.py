@@ -122,9 +122,6 @@ def get_audio_messages(message):
         os.remove(fname+'.oga')
 
 
-
-
-
 def audio_to_text(dest_name: str):
     # Функция для перевода аудио, в формате ".vaw" в текст
     rating = 0
@@ -138,17 +135,20 @@ def audio_to_text(dest_name: str):
 
     # используя возможности библиотеки распознаем текст,
     # можно изменять язык распознавания
+
+
 """if result.strip() == twister_lib[twister].strip():
         rating = + 1
         return f"Вы произнесли '{result}' все верно\nВаш рейтинг {rating}"
     elif result.strip() != twister_lib[twister].strip():
-        return f"Вы произнесли '{result}' не верно, а должно быть'{twister_lib[twister]}'"
+        return f"Вы произнесли '{result}'
+        не верно, а должно быть'{twister_lib[twister]}'"
 """
 
 
 def difference_three(txt1, txt2):
- # разрешает сделать 2 ошибки
- # сравнивает посимвольно строку и если
+    # разрешает сделать 2 ошибки
+    # сравнивает посимвольно строку и если
     count = 0
     if len(txt1) == len(txt2):
         for i in range(0, len(txt1)):
