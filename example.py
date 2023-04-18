@@ -18,7 +18,7 @@ logfile = str(datetime.date.today()) + '.log'
 bot = telebot.TeleBot(settings.TOKEN_TELEGRAM_BOT)
 twister = random_twister()
 twister_lib = {
-    "twister1": "на дворе трава, на траве дрова не руби дрова на траве двора",
+    "twister1": "на дворе трава на траве дрова не руби дрова на траве двора",
     "twister2": "карл у клары украл кораллы клара у карла украла кларнет",
     "twister3": "корабли лавировали лавировали да не вылавировали",
     "twister4": "в недрах тундры выдры в гетрах тырят в вёдра ядра кедров",
@@ -89,8 +89,10 @@ def get_audio_messages(message):
         # ffmpeg, для конвертации .oga в .vaw
         result = audio_to_text(fname+'.wav')
         # Вызов функции для перевода аудио в текст
-        bot.send_message(message.from_user.id, format(result))
-        # Отправляем пользователю, приславшему файл, его текст
+        bot.send_message(
+            message.from_user.id,
+            f"{difference_three(result.strip(),twister_lib[twister].strip())} произнес:\n '{result}'\n должно быть:\n '{twister_lib[twister]}'")
+        # Отправляем пользователю, сравнениее аудио и скороговорки
     except sr.UnknownValueError as e:
         # Ошибка возникает, если сообщение не удалось разобрать.
         # В таком случае отсылается ответ пользователю и заносим запись в лог
@@ -131,7 +133,7 @@ def audio_to_text(dest_name: str):
     with message as source:
         audio = r.record(source)
     result = r.recognize_google(audio, language="ru_RU").lower()
-    return difference_three(result.strip(), twister_lib[twister].strip())
+    return result
 
     # используя возможности библиотеки распознаем текст,
     # можно изменять язык распознавания
@@ -150,14 +152,14 @@ def difference_three(txt1, txt2):
     # разрешает сделать 2 ошибки
     # сравнивает посимвольно строку и если
     count = 0
-    if len(txt1) == len(txt2):
+    if len(txt1)+2 >= len(txt2):
         for i in range(0, len(txt1)):
             if txt1[i] == txt2[i]:
                 count = count + 1
     if count+2 >= len(txt1):
-        return "все верно\nВаш рейтинг"
+        return "все верно!\n"
     else:
-        return "Не верно!"
+        return "Не верно, попробуйте еще раз\n"
 
 
 bot.polling(none_stop=True, interval=0)
