@@ -9,7 +9,7 @@ import settings
 import random
 import datetime
 from utils import random_twister
-
+import json
 
 logging.basicConfig(filename='example.log', level=logging.INFO)
 # запись в реестр
@@ -72,7 +72,8 @@ def greeting_user(message):
     bot.send_message(message.from_user.id, "Привет я бот <b>SpikerClub</b>\n"
                      "помогаю тренировать речь с помощью скороговорок,\n"
                      "что бы начать нажмите\n <b>Новая скороговорка</b>",
-                     parse_mode="html", reply_markup=main_keyboard(message))
+                     parse_mode="html",
+                     reply_markup=main_keyboard(message))
 
 
 @bot.message_handler(content_types=['voice'])
@@ -98,8 +99,10 @@ def get_audio_messages(message):
             message.from_user.id,
             f"{difference_three(result.strip(),twister_lib[twister].strip())}"
             f"Вы произнесли:\n<b>{result.capitalize()}</b>\nДолжно быть:\n"
-            f"<b>{twister_lib[twister].capitalize()}</b>",
-            parse_mode="html", reply_markup=main_keyboard(message))
+            f"<b>{twister_lib[twister].capitalize()}</b>\n"
+            f"{user}",
+            parse_mode="html",
+            reply_markup=main_keyboard(message))
         # Отправляем пользователю, сравнениее аудио и скороговорки
     except sr.UnknownValueError as e:
         # Ошибка возникает, если сообщение не удалось разобрать.
@@ -149,14 +152,54 @@ def difference_three(txt1, txt2):
     # разрешает сделать 2 ошибки
     # сравнивает посимвольно строку и если
     count = 0
+    rating = 0
     if len(txt1)+3 >= len(txt2):
         for i in range(0, len(txt1)):
             if txt1[i] == txt2[i]:
                 count = count + 1
     if count+3 >= len(txt1):
-        return "все верно!\n"
+        rating += 1
+        return f"все верно!\nваш рейтинг {rating} "
+
     else:
         return "Не верно, попробуйте еще раз\n"
+
+
+def add_rating():
+    rating = 0
+    rating = rating + 1
+    return rating
+
+
+def save_rating(data, rating_file):
+    data = json.dumps(data)
+    data = json.loads(str(data))
+
+    with open(rating_file, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4)
+
+
+data = {
+    "users": []
+}
+
+data["users"].append({
+    "name": "message.from_user.first_name",
+    "chat_id": "message.from_user.id",
+    "rating": add_rating()
+})
+
+save_rating(data, "rating_file.json")
+
+
+def read_rating(file_name):
+    with open(file_name, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+users = read_rating("rating_file.json")
+for user in users["users"]:
+    print(user)
 
 
 bot.polling(none_stop=True, interval=0)
